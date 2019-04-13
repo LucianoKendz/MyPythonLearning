@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+	My first try on path finder code, using PyGame module.
+"""
+__author__ = "Luciano Kendzierski"
+__version__ = 0.0.1
+
+
+
 import pygame
 import random
 import math
-
-pygame.init()
 
 class Config:
 	def __init__(self):
@@ -226,6 +233,7 @@ class Game:
 			self.table.draw(display)
 
 def main():
+	pygame.init()
 	config = Config()
 	resolution = config.get_resolution()
 
