@@ -3,7 +3,7 @@
 	My first try on path finder code, using PyGame module.
 """
 __author__ = "Luciano Kendzierski"
-__version__ = 0.0.1
+__version__ = "0.0.1"
 
 
 
