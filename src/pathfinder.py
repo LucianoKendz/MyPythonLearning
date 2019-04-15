@@ -4,7 +4,7 @@
 """
 __author__ = "Luciano Kendzierski"
 __version__ = "0.0.1"
-
+__email__ = "luciano.kendzierski@gmail.com"
 
 
 import pygame
