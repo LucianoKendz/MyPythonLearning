@@ -3,7 +3,7 @@
 	My first try on path finder code, using PyGame module.
 """
 __author__ = "Luciano Kendzierski"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __email__ = "luciano.kendzierski@gmail.com"
 
 
@@ -17,18 +17,25 @@ class Config:
 		self.H_DISP = 600 
 		# Table Config
 		self.SpotSize = 10
-		self.tableLineColor = (0,155,10)
+		self.tableLineColor = (10, 100, 50)
 		self.tableLineWidth = 1
 		self.borderDistance = 1
 		self.blockPinsCount = 700
 		self.blockPinsColor = (100,0,0)
+		self.show_block_pins = True
+		self.showTable = True
 
 		# Pin Config
 		self.PinRadius = int(self.SpotSize/2)
 
 		# Walker
-		self.walkerColor = (0,10,155)
+		self.walkerColor = ( 51, 255 , 208 )
 		self.targetColor = (100,0,100)
+
+		self.backGroundColor = ( 50 , 50 , 50 )
+		self.tickValue = 60
+
+		
 
 	def get_resolution(self):
 		return (self.W_DISP,self.H_DISP)
@@ -86,7 +93,14 @@ class Table:
 	def update(self):
 		pass
 
-	def draw(self, display):
+	def draw(self, display, draw_lines=True, draw_block_pins=True):
+		if draw_lines:
+			self.draw_lines(display)
+		
+		if draw_block_pins:
+			self.draw_block_pins(display)
+
+	def draw_lines(self, display):
 		for index in range(self.borderDistance, self.width_spots):
 			tmpPos = index * self.SpotSize
 			startPoint = (tmpPos, self.SpotSize)
@@ -99,6 +113,7 @@ class Table:
 			endPoint = (self.d_width-self.SpotSize, tmpPos)
 			pygame.draw.line(display, self.lineColor, startPoint, endPoint, self.lineWidth)
 
+	def draw_block_pins(self, display):
 		for blockPin in self.blockPins:
 			tmpPin = Pin(self.config, self.config.blockPinsColor, blockPin)
 			tmpPin.draw(display, self)
@@ -212,12 +227,13 @@ class Walker:
 				self.finish = True
 
 class Game:
-	def __init__(self, config):
+	def __init__(self, config, display ):
+		self.display = display
 		self.config = config
 		self.table = Table(self.config)
 		self.walker = Walker(self.config, self.table)
 		self.over = False
-		self.showTable = True
+		self.clock = pygame.time.Clock()
 
 	def update(self):
 		self.table.update()
@@ -229,45 +245,54 @@ class Game:
 	def draw(self, display):
 		self.walker.draw(display)
 
-		if self.showTable:
-			self.table.draw(display)
+		self.table.draw(display, self.config.showTable, self.config.show_block_pins)
+
+	def events( self ):
+		for event in pygame.event.get():
+			self.event_checker( event ) 
+
+	def event_checker( self, event ):
+		if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
+
+		if event.type == pygame.KEYDOWN:
+			if event.key in (pygame.K_q, pygame.K_ESCAPE):
+				pygame.quit()
+				quit()
+				
+			if event.key == pygame.K_r:
+				self.over = True
+
+			if event.key == pygame.K_t:
+				self.config.showTable = False if self.config.showTable else True
+
+			if event.key == pygame.K_b:
+				self.config.show_block_pins = False if self.config.show_block_pins else True
+
+	def run( self ):
+		while not self.over:
+			self.display.fill( self.config.backGroundColor )
+
+			self.events()
+
+			self.update()
+			self.draw(self.display)
+
+
+			pygame.display.flip()
+			self.clock.tick( self.config.tickValue )
+
 
 def main():
 	pygame.init()
 	config = Config()
-	resolution = config.get_resolution()
-
-	display = pygame.display.set_mode(resolution)
+	display = pygame.display.set_mode( config.get_resolution() )
 	pygame.display.set_caption("Teste")
-	clock = pygame.time.Clock()
 
 	while True:
-		
-		game = Game(config)
-
-		while not game.over:
-			display.fill(0)
-
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					pygame.quit()
-					quit()
-
-				if event.type == pygame.KEYDOWN:
-					if event.key in (pygame.K_q, pygame.K_ESCAPE):
-						pygame.quit()
-						quit()
-					if event.key == pygame.K_r:
-						game.over = True
-
-					if event.key == pygame.K_t:
-						game.showTable = False if game.showTable else True
-
-			game.update()
-			game.draw(display)
-
-			pygame.display.flip()
-			clock.tick(60)
+		game = Game(config, display)
+		game.run()
 
 
 if __name__ == '__main__':
